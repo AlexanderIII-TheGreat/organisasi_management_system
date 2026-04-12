@@ -4,7 +4,7 @@
 ![Laravel](https://img.shields.io/badge/Laravel-11.x-FF2D20.svg?logo=laravel&logoColor=white)
 ![Next.js](https://img.shields.io/badge/Next.js-16.x-black.svg?logo=next.js&logoColor=white)
 
-Sistem Manajemen Organisasi (OMS) adalah aplikasi komprehensif yang dirancang secara spesifik, responsif, dan elegan berlapis identitas *"Anti-Gravity UI"* untuk mengelola alur kerja organisasi seperti **Karang Taruna**. Sistem ini menangani portal anggota, rekrutmen/verifikasi pendaftaran, penerbitan Kartu Tanda Anggota (KTA) digital berbentuk tiket interaktif dan dokumen cetak (PDF), penyaluran aspirasi (ticketing), manajemen acara (event), hingga penyediaan modul Tes Minat dan Bakat untuk pemetaan pembagian anggota ke struktur kepanitiaan/divisi.
+Organisasi Management System (OMS) adalah aplikasi komprehensif yang dirancang secara spesifik, responsif, dan elegan berlapis identitas *"Anti-Gravity UI"* untuk mengelola alur kerja organisasi seperti **Karang Taruna**. Sistem ini menangani portal anggota, rekrutmen/verifikasi pendaftaran, penerbitan Kartu Tanda Anggota (KTA) digital berbentuk tiket interaktif dan dokumen cetak (PDF), penyaluran aspirasi (ticketing), manajemen acara (event), hingga penyediaan modul Tes Minat dan Bakat untuk pemetaan pembagian anggota ke struktur kepanitiaan/divisi.
 
 ## 🚀 Fitur Utama
 - **Manajemen Anggota:** Registrasi, pembuatan otomatis Nomor Induk Anggota (NIA) berdasarkan region kependudukan, role (Admin/Pengurus/Anggota), dan aktivasi yang dilengkapi dengan interkoneksi Email Notifikasi menggunakan Brevo API.
