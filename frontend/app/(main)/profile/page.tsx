@@ -56,6 +56,7 @@ export default function ProfilPage() {
     fetchUser();
   }, []);
 
+  const fetchUser = async () => {
     setLoading(true);
     try {
       const response = await getMe<UserData>();
