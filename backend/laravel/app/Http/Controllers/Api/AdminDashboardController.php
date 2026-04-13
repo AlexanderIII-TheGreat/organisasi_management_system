@@ -20,8 +20,8 @@ class AdminDashboardController extends Controller
     {
         $totalMembers = User::count();
         $pendingActivations = User::where('status', 'nonaktif')->count();
-        $activeEvents = Event::where('status', 'berlangsung')->count();
-        $pendingAspirations = Aspiration::where('status', 'menunggu')->count();
+        $activeEvents = Event::where('status', '!=', 'selesai')->count();
+        $pendingAspirations = Aspiration::count();
 
         // Optional additional stats
         $totalAspirations = Aspiration::count();

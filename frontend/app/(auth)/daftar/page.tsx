@@ -218,7 +218,7 @@ export default function DaftarPage() {
   return (
     <div className="min-h-screen bg-surface text-on-surface flex flex-col relative overflow-hidden">
 
-      {/* Top Bar */}
+      {/* Top Bar
       <nav className="fixed top-0 w-full z-50 flex justify-between items-center px-6 py-4 bg-surface/70 backdrop-blur-xl">
         <div className="text-2xl font-bold tracking-tight text-primary font-headline">
           Karang Taruna
@@ -229,7 +229,7 @@ export default function DaftarPage() {
         >
           Masuk
         </Link>
-      </nav>
+      </nav> */}
 
       <main className="flex-grow pt-32 pb-20 px-6 relative z-10">
         <div className="max-w-[1000px] mx-auto">

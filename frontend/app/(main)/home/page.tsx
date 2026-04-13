@@ -170,7 +170,7 @@ export default function HomePage() {
                     <div className="flex-1 text-[8px] md:text-[10px] space-y-1 font-mono text-white">
                       <div className="flex"><span className="w-16 font-bold">Nama</span><span className="truncate">: {user.name}</span></div>
                       <div className="flex"><span className="w-16 font-bold">NIA</span><span>: {user.member_number || "BELUM TERSEDIA"}</span></div>
-                      <div className="flex"><span className="w-16 font-bold">Alamat</span><span className="flex-1">: {[user.district, user.city, user.province].filter(Boolean).join(", ") || (user.address || "Belum diisi")}</span></div>
+                      <div className="flex"><span className="w-16 font-bold">Alamat</span><span className="flex-1">: {[user.address, user.district, user.city, user.province].filter(Boolean).join(", ") || "Belum diisi"}</span></div>
                       <div className="flex"><span className="w-16 font-bold">Jabatan</span><span>: {user.position ? user.position.toUpperCase() : "ANGGOTA"}</span></div>
                     </div>
                   </div>
@@ -364,7 +364,7 @@ export default function HomePage() {
               </div>
               <div className="pt-4 flex gap-4">
                 <Link 
-                  href={`/event/${joinedEvent.id}`}
+                  href={`/event`}
                   className="flex-1 md:flex-none px-8 py-3 bg-primary text-white font-bold rounded-xl active:scale-95 transition-all text-center"
                 >
                   Lihat Detail

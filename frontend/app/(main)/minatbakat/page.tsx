@@ -84,7 +84,10 @@ export default function MinatBakatPage() {
     try {
       const response = await submitTalentTest(test.id, { answers });
       if (response.success) {
-        setResult(response.data);
+        setResult(response.data as ResultData);
+      } else if (response.message === 'Anda sudah pernah mengerjakan test ini.' && response.data) {
+        // Jika sebelumnya sudah pernah submit, langsung tunjukkan hasilnya saja
+        setResult(response.data as ResultData);
       } else {
         setError(response.message || 'Gagal mengirim jawaban.');
       }
@@ -191,34 +194,42 @@ export default function MinatBakatPage() {
             })}
           </div>
 
-          <div className="mt-16 flex justify-between items-center">
-            <button 
-              onClick={() => setCurrentStep(prev => Math.max(0, prev - 1))}
-              disabled={currentStep === 0}
-              className="flex items-center gap-2 px-6 py-3 font-headline font-bold text-on-surface-variant hover:text-primary transition-colors disabled:opacity-30"
-            >
-              <span className="material-symbols-outlined">arrow_back</span>
-              Sebelumnya
-            </button>
-            
-            {isLastStep ? (
-              <button 
-                onClick={handleSubmit}
-                disabled={!hasAnsweredCurrent || isSubmitting}
-                className="bg-primary text-white px-10 py-4 rounded-full font-bold shadow-xl shadow-primary/20 scale-110 active:scale-95 transition-all disabled:opacity-50"
-              >
-                {isSubmitting ? 'Menganalisis...' : 'Selesaikan Tes'}
-              </button>
-            ) : (
-              <button 
-                onClick={() => setCurrentStep(prev => prev + 1)}
-                disabled={!hasAnsweredCurrent}
-                className="flex items-center gap-2 px-6 py-3 font-headline font-bold text-primary transition-all disabled:opacity-30"
-              >
-                Selanjutnya
-                <span className="material-symbols-outlined">arrow_forward</span>
-              </button>
+          <div className="mt-16 flex flex-col gap-4">
+            {error && (
+              <div className="p-4 bg-error/10 border border-error/20 rounded-2xl flex items-center gap-3 text-error">
+                <span className="material-symbols-outlined">error</span>
+                <p className="font-medium text-sm">{error}</p>
+              </div>
             )}
+            <div className="flex justify-between items-center w-full">
+              <button 
+                onClick={() => setCurrentStep(prev => Math.max(0, prev - 1))}
+                disabled={currentStep === 0}
+                className="flex items-center gap-2 px-6 py-3 font-headline font-bold text-on-surface-variant hover:text-primary transition-colors disabled:opacity-30"
+              >
+                <span className="material-symbols-outlined">arrow_back</span>
+                Sebelumnya
+              </button>
+              
+              {isLastStep ? (
+                <button 
+                  onClick={handleSubmit}
+                  disabled={!hasAnsweredCurrent || isSubmitting}
+                  className="bg-primary text-white px-10 py-4 rounded-full font-bold shadow-xl shadow-primary/20 scale-110 active:scale-95 transition-all disabled:opacity-50"
+                >
+                  {isSubmitting ? 'Menganalisis...' : 'Selesaikan Tes'}
+                </button>
+              ) : (
+                <button 
+                  onClick={() => setCurrentStep(prev => prev + 1)}
+                  disabled={!hasAnsweredCurrent}
+                  className="flex items-center gap-2 px-6 py-3 font-headline font-bold text-primary transition-all disabled:opacity-30"
+                >
+                  Selanjutnya
+                  <span className="material-symbols-outlined">arrow_forward</span>
+                </button>
+              )}
+            </div>
           </div>
         </div>
       ) : (

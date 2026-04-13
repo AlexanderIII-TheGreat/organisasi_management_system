@@ -108,6 +108,28 @@ class UserController extends Controller
     }
 
     /**
+     * Update password user sendiri.
+     */
+    public function updatePassword(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $validated = $request->validate([
+            'current_password' => ['required', 'string', 'current_password'],
+            'password'         => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        $user->update([
+            'password' => \Illuminate\Support\Facades\Hash::make($validated['password']),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Kata sandi berhasil diperbarui.',
+        ]);
+    }
+
+    /**
      * Admin: aktivasi / deaktivasi user.
      */
     public function updateStatus(Request $request, User $user): JsonResponse
@@ -139,6 +161,24 @@ class UserController extends Controller
         return response()->json([
             'success' => true,
             'message' => "Role user berhasil diubah menjadi {$validated['role']}.",
+            'data' => new UserResource($user->fresh()),
+        ]);
+    }
+
+    /**
+     * Admin: ubah jabatan user.
+     */
+    public function updatePosition(Request $request, User $user): JsonResponse
+    {
+        $validated = $request->validate([
+            'position_id' => ['required', 'exists:positions,id'],
+        ]);
+
+        $user->update(['position_id' => $validated['position_id']]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Jabatan user berhasil diperbarui.',
             'data' => new UserResource($user->fresh()),
         ]);
     }

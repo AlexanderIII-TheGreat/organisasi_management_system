@@ -70,6 +70,8 @@ class EventController extends Controller
             'event_date' => ['required', 'date', 'after:now'],
             'registration_deadline' => ['nullable', 'date', 'before:event_date'],
             'status' => ['nullable', 'in:mendatang,berlangsung,selesai'],
+            'panitias' => ['nullable', 'array'],
+            'panitias.*' => ['exists:users,id'],
         ]);
 
         if ($request->hasFile('image')) {
@@ -79,6 +81,10 @@ class EventController extends Controller
         $validated['created_by'] = $request->user()->id;
 
         $event = Event::create($validated);
+
+        if ($request->has('panitias') && is_array($request->input('panitias'))) {
+            $event->panitias()->sync($request->input('panitias'));
+        }
 
         return response()->json([
             'success' => true,
@@ -101,6 +107,8 @@ class EventController extends Controller
             'event_date' => ['sometimes', 'date'],
             'registration_deadline' => ['nullable', 'date'],
             'status' => ['sometimes', 'in:mendatang,berlangsung,selesai'],
+            'panitias' => ['nullable', 'array'],
+            'panitias.*' => ['exists:users,id'],
         ]);
 
         if ($request->hasFile('image')) {
@@ -108,7 +116,12 @@ class EventController extends Controller
         }
 
         $event->update($validated);
-        $event->loadMissing('creator');
+
+        if ($request->has('panitias') && is_array($request->input('panitias'))) {
+            $event->panitias()->sync($request->input('panitias'));
+        }
+
+        $event->loadMissing(['creator', 'panitias']);
 
         return response()->json([
             'success' => true,

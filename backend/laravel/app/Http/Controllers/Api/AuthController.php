@@ -26,12 +26,12 @@ class AuthController extends Controller
             'name'     => ['required', 'string', 'max:255'],
             'email'    => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'confirmed', Password::defaults()],
-            'address'  => ['nullable', 'string'],
-            'province' => ['nullable', 'string', 'max:255'],
-            'city'     => ['nullable', 'string', 'max:255'],
-            'district' => ['nullable', 'string', 'max:255'],
-            'phone'    => ['nullable', 'string', 'max:20'],
-            'photo'    => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'], // max 2MB
+            'address'  => ['required', 'string'],
+            'province' => ['required', 'string', 'max:255'],
+            'city'     => ['required', 'string', 'max:255'],
+            'district' => ['required', 'string', 'max:255'],
+            'phone'    => ['required', 'string', 'max:20'],
+            'photo'    => ['required', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'], // max 2MB
         ]);
 
         // Generate nomor anggota otomatis berdasarkan provinsi & kota

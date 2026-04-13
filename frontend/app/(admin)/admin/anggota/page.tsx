@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getUsers, updateUserStatus, updateUserRole, deleteUser, sendActivationEmail } from '@/lib/api';
+import { getUsers, updateUserStatus, updateUserRole, deleteUser, sendActivationEmail, getPositions, updateUserPosition } from '@/lib/api';
 
 interface UserData {
   id: number;
@@ -16,11 +16,13 @@ interface UserData {
   province: string | null;
   city: string | null;
   district: string | null;
+  position_id: number | null;
   position: string | null;
 }
 
 export default function AdminAnggotaPage() {
   const [users, setUsers] = useState<UserData[]>([]);
+  const [positions, setPositions] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   
@@ -47,6 +49,19 @@ export default function AdminAnggotaPage() {
   useEffect(() => {
     // Initial fetch
     fetchUsers();
+    
+    // Fetch positions
+    const fetchPositions = async () => {
+      try {
+        const res = await getPositions();
+        if (res.success && res.data) {
+          setPositions(res.data as any[]);
+        }
+      } catch (e) {
+        console.error("Gagal ambil posisi:", e);
+      }
+    };
+    fetchPositions();
   }, []);
 
   const handleSearch = (e: React.FormEvent) => {
@@ -84,6 +99,21 @@ export default function AdminAnggotaPage() {
     } catch (e) {
       console.error(e);
       alert('Gagal mengubah role');
+    }
+  };
+
+  const handlePositionChange = async (userId: number, positionId: number) => {
+    try {
+      const res = await updateUserPosition(userId, positionId);
+      if (res.success) {
+        const updatedPos = positions.find(p => p.id === positionId)?.name || 'Anggota';
+        setUsers(users.map(u => u.id === userId ? { ...u, position_id: positionId, position: updatedPos } : u));
+      } else {
+        alert(res.message);
+      }
+    } catch (e) {
+      console.error(e);
+      alert('Gagal mengubah jabatan');
     }
   };
 
@@ -189,7 +219,7 @@ export default function AdminAnggotaPage() {
                         <div className="flex items-start gap-1.5 text-xs text-on-surface-variant">
                           <span className="material-symbols-outlined text-[14px] mt-0.5">location_on</span>
                           <span className="line-clamp-2 md:whitespace-normal whitespace-pre-wrap leading-tight">
-                            {[u.district, u.city, u.province].filter(Boolean).join(', ') || u.address || '-'}
+                            {[u.address, u.district, u.city, u.province].filter(Boolean).join(', ') || '-'}
                           </span>
                         </div>
                       </div>
@@ -208,15 +238,25 @@ export default function AdminAnggotaPage() {
                         </button>
                         
                         <div className="flex flex-col gap-1">
-                           <span className="text-[10px] uppercase font-bold text-on-surface-variant">Jabatan: <span className="text-primary">{u.position || 'Anggota'}</span></span>
+                           <span className="text-[10px] uppercase font-bold text-on-surface-variant">Kedudukan:</span>
+                           <select 
+                            value={u.position_id || ''}
+                            onChange={(e) => handlePositionChange(u.id, parseInt(e.target.value))}
+                            className="text-xs font-bold bg-white border border-outline-variant/30 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary w-full cursor-pointer"
+                          >
+                            <option value="" disabled>Pilih Jabatan</option>
+                            {positions.map(p => (
+                              <option key={p.id} value={p.id}>{p.name}</option>
+                            ))}
+                          </select>
                            <select 
                             value={u.role}
                             onChange={(e) => handleRoleChange(u.id, e.target.value as any)}
-                            className="text-xs font-bold bg-surface-container border border-outline-variant/30 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary w-fit cursor-pointer"
+                            className="text-xs font-bold bg-surface-container border border-outline-variant/30 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary w-full cursor-pointer"
                           >
-                            <option value="anggota">Anggota</option>
-                            <option value="pengurus">Pengurus</option>
-                            <option value="admin">Admin System</option>
+                            <option value="anggota">Role: Anggota</option>
+                            <option value="pengurus">Role: Pengurus</option>
+                            <option value="admin">Role: Admin</option>
                           </select>
                         </div>
                        </div>

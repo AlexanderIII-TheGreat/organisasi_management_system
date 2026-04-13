@@ -64,12 +64,14 @@ async function apiFetch<T = unknown>(
         success: false,
         message: data.message || 'Validasi gagal.',
         errors: data.errors,
+        data: data.data,
       };
     }
 
     return {
       success: false,
       message: data.message || `Request failed with status ${response.status}`,
+      data: data.data,
     };
   }
 
@@ -140,6 +142,21 @@ export async function logout() {
 
 export async function getMe() {
   return apiFetch('/me');
+}
+
+export async function updateProfile(data: FormData | object) {
+  const isFormData = data instanceof FormData;
+  return apiFetch('/profile', {
+    method: 'POST', // Use POST for both cases, backend handles 'sometimes' logic
+    body: isFormData ? data : JSON.stringify(data),
+  });
+}
+
+export async function updatePassword(data: object) {
+  return apiFetch('/profile/password', {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
 }
 
 export async function getGoogleRedirectUrl() {
@@ -284,6 +301,17 @@ export async function updateUserRole(userId: number, role: 'admin' | 'pengurus' 
     method: 'PATCH',
     body: JSON.stringify({ role })
   });
+}
+
+export async function updateUserPosition(userId: number, positionId: number) {
+  return apiFetch(`/users/${userId}/position`, {
+    method: 'PATCH',
+    body: JSON.stringify({ position_id: positionId }),
+  });
+}
+
+export async function getPositions() {
+  return apiFetch('/positions');
 }
 
 export async function deleteUser(userId: number) {

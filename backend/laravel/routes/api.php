@@ -45,6 +45,7 @@ Route::middleware(['auth:sanctum', \App\Http\Middleware\EnsureAccountIsActive::c
 
     Route::put('/profile', [UserController::class, 'update']);
     Route::post('/profile', [UserController::class, 'update']); // alias untuk FormData upload
+    Route::put('/profile/password', [UserController::class, 'updatePassword']);
     Route::get('/me/kta-pdf', [UserController::class, 'generateKta']);
 
     // Users (anggota bisa lihat list user aktif)
@@ -78,6 +79,8 @@ Route::middleware(['auth:sanctum', \App\Http\Middleware\EnsureAccountIsActive::c
         // User management
         Route::patch('/users/{user}/status', [UserController::class, 'updateStatus']);
         Route::patch('/users/{user}/role', [UserController::class, 'updateRole']);
+        Route::patch('/users/{user}/position', [UserController::class, 'updatePosition']);
+        Route::get('/positions', [\App\Http\Controllers\Api\PositionController::class, 'index']);
         Route::post('/users/{user}/send-activation-email', [UserController::class, 'sendActivationEmail']);
         Route::delete('/users/{user}', [UserController::class, 'destroy']);
 

@@ -1,21 +1,24 @@
 'use client';
 
 import { useEffect, useState, FormEvent } from 'react';
-import { getEvents, createEvent, updateEvent, deleteEvent } from '@/lib/api';
+import { getEvents, createEvent, updateEvent, deleteEvent, getUsers } from '@/lib/api';
 
 interface EventData {
   id: number;
   title: string;
   slug: string;
+  image: string | null;
   event_date: string;
   location: string;
   description: string;
   status: string;
   panitias_count: number;
+  panitias?: Array<{ id: number; name: string }>;
 }
 
 export default function AdminEventsPage() {
   const [events, setEvents] = useState<EventData[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Modal State
@@ -29,7 +32,8 @@ export default function AdminEventsPage() {
     description: '',
     location: '',
     event_date: '',
-    status: 'mendatang'
+    status: 'mendatang',
+    panitias: [] as number[]
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
 
@@ -49,11 +53,24 @@ export default function AdminEventsPage() {
 
   useEffect(() => {
     fetchEvents();
+    
+    // Fetch users for panitia selection
+    const fetchUsers = async () => {
+      try {
+        const res = await getUsers();
+        if (res.success && res.data) {
+          setUsers(res.data as any[]);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    fetchUsers();
   }, []);
 
   const openAddModal = () => {
     setEditingEvent(null);
-    setFormData({ title: '', description: '', location: '', event_date: '', status: 'mendatang' });
+    setFormData({ title: '', description: '', location: '', event_date: '', status: 'mendatang', panitias: [] });
     setImageFile(null);
     setIsModalOpen(true);
   };
@@ -65,7 +82,8 @@ export default function AdminEventsPage() {
       description: event.description || '',
       location: event.location || '',
       event_date: event.event_date ? new Date(event.event_date).toISOString().split('T')[0] : '',
-      status: event.status || 'mendatang'
+      status: event.status || 'mendatang',
+      panitias: event.panitias?.map(p => p.id) || []
     });
     setImageFile(null);
     setIsModalOpen(true);
@@ -87,6 +105,11 @@ export default function AdminEventsPage() {
       payaload.append('location', formData.location);
       payaload.append('event_date', formData.event_date);
       payaload.append('status', formData.status);
+      
+      formData.panitias.forEach((id, index) => {
+        payaload.append(`panitias[${index}]`, id.toString());
+      });
+
       if (imageFile) {
         payaload.append('image', imageFile);
       }
@@ -160,6 +183,12 @@ export default function AdminEventsPage() {
                    <span className="material-symbols-outlined text-[16px]">delete</span>
                  </button>
               </div>
+              
+              {event.image && (
+                <div className="w-full aspect-video rounded-2xl overflow-hidden mb-4 border border-outline-variant/10">
+                  <img src={event.image} alt={event.title} className="w-full h-full object-cover" />
+                </div>
+              )}
               
               <div className="flex justify-between items-start mb-4">
                 <span className={`px-3 py-1 text-[10px] font-bold uppercase tracking-widest rounded-full ${
@@ -289,6 +318,24 @@ export default function AdminEventsPage() {
                     <option value="berlangsung">Sedang Berlangsung</option>
                     <option value="selesai">Selesai</option>
                   </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-on-surface-variant mb-1">Kepanitiaan Event</label>
+                  <select 
+                    multiple
+                    value={formData.panitias.map(String)}
+                    onChange={e => {
+                      const selectedIds = Array.from(e.target.selectedOptions, option => parseInt(option.value));
+                      setFormData({...formData, panitias: selectedIds});
+                    }}
+                    className="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant/30 rounded-xl focus:ring-2 focus:ring-primary focus:outline-none cursor-pointer h-32"
+                  >
+                    {users.map(user => (
+                      <option key={user.id} value={user.id}>{user.name}</option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-on-surface-variant mt-1">Tahan tombol Ctrl (Windows) atau Command (Mac) untuk memilih lebih dari satu panitia.</p>
                 </div>
 
                 <div className="pt-4 border-t border-outline-variant/20 flex justify-end gap-3">

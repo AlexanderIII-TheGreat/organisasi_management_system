@@ -21,7 +21,7 @@ class EventResource extends JsonResource
             'title' => $this->title,
             'slug' => $this->slug,
             'description' => $this->description,
-            'image' => $this->image,
+            'image' => $this->image ? url('storage/' . $this->image) : null,
             'location' => $this->location,
             'event_date' => $this->event_date?->toISOString(),
             'registration_deadline' => $this->registration_deadline?->toISOString(),
