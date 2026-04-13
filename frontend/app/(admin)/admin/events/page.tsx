@@ -40,9 +40,9 @@ export default function AdminEventsPage() {
   const fetchEvents = async () => {
     setIsLoading(true);
     try {
-      const response = await getEvents();
+      const response = await getEvents<EventData[]>();
       if (response.success && response.data) {
-        setEvents(response.data as unknown as EventData[]);
+        setEvents(response.data);
       }
     } catch (e) {
       console.error(e);
@@ -57,9 +57,9 @@ export default function AdminEventsPage() {
     // Fetch users for panitia selection
     const fetchUsers = async () => {
       try {
-        const res = await getUsers();
+        const res = await getUsers<any[]>();
         if (res.success && res.data) {
-          setUsers(res.data as any[]);
+          setUsers(res.data);
         }
       } catch (e) {
         console.error(e);

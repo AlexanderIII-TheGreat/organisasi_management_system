@@ -170,19 +170,19 @@ export function getStoredToken(): string | null {
   return localStorage.getItem('auth_token');
 }
 
-export async function getUsers(params?: Record<string, string>) {
+export async function getUsers<T = unknown>(params?: Record<string, string>) {
   const query = params ? '?' + new URLSearchParams(params).toString() : '';
-  return apiFetch(`/users${query}`);
+  return apiFetch<T>(`/users${query}`);
 }
 
-export async function getEvents(params?: Record<string, string>) {
+export async function getEvents<T = unknown>(params?: Record<string, string>) {
   const query = params ? '?' + new URLSearchParams(params).toString() : '';
-  return apiFetch(`/events${query}`);
+  return apiFetch<T>(`/events${query}`);
 }
 
-export async function getAspirations(params?: Record<string, string>) {
+export async function getAspirations<T = unknown>(params?: Record<string, string>) {
   const query = params ? '?' + new URLSearchParams(params).toString() : '';
-  return apiFetch(`/aspirasi${query}`);
+  return apiFetch<T>(`/aspirasi${query}`);
 }
 
 export async function submitAspiration(data: { category: string; message: string; is_anonymous: boolean }) {

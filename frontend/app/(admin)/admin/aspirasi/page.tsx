@@ -23,9 +23,9 @@ export default function AdminAspirasiPage() {
   useEffect(() => {
     async function fetchAspirations() {
       try {
-        const response = await getAspirations();
+        const response = await getAspirations<AspirationData[]>();
         if (response.success && response.data) {
-          setAspirations(response.data as unknown as AspirationData[]);
+          setAspirations(response.data);
         }
       } catch (e) {
         console.error(e);

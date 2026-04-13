@@ -33,11 +33,9 @@ export default function AdminAnggotaPage() {
   const fetchUsers = async (page = 1, search = '') => {
     setIsLoading(true);
     try {
-      const response = await getUsers({ page: page.toString(), search, per_page: '15' });
+      const response = await getUsers<UserData[]>({ page: page.toString(), search, per_page: '15' });
       if (response.success && response.data) {
-        // Asumsi laravel pagination resource array dibungkus dalam 'data' array
-        setUsers(response.data as unknown as UserData[]); 
-        // Note: For full pagination you'd extract meta here. Keeping simple for sprint.
+        setUsers(response.data); 
       }
     } catch (e) {
       console.error(e);
@@ -53,9 +51,9 @@ export default function AdminAnggotaPage() {
     // Fetch positions
     const fetchPositions = async () => {
       try {
-        const res = await getPositions();
+        const res = await getPositions<any[]>();
         if (res.success && res.data) {
-          setPositions(res.data as any[]);
+          setPositions(res.data);
         }
       } catch (e) {
         console.error("Gagal ambil posisi:", e);

@@ -22,7 +22,7 @@ export default function AnggotaPage() {
   const fetchMembers = async () => {
     setLoading(true);
     try {
-      const response = await getUsers();
+      const response = await getUsers<Member[]>();
       if (response.success && response.data) {
         setMembers(response.data);
       }
