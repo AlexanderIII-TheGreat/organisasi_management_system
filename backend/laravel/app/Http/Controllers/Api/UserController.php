@@ -184,7 +184,7 @@ class UserController extends Controller
     }
 
     /**
-     * Kirim email aktivasi ke user melalui layanan Brevo API.
+     * Kirim email aktivasi menggunakan email SMTP default Laravel (mengabaikan API dan IP restrictions Brevo).
      */
     public function sendActivationEmail(User $user): JsonResponse
     {
@@ -195,33 +195,8 @@ class UserController extends Controller
             ], 400);
         }
 
-        $brevoApiKey = env('BREVO_APIKEY');
-        $senderEmail = env('BREVO_EMAIL', 'noreply@karangtaruna.com');
-
-        if (!$brevoApiKey) {
-             return response()->json([
-                'success' => false,
-                'message' => 'Integrasi API Brevo belum dikonfigurasi di server.'
-             ], 500);
-        }
-
-        $response = \Illuminate\Support\Facades\Http::withHeaders([
-            'api-key' => $brevoApiKey,
-            'Content-Type' => 'application/json',
-            'Accept' => 'application/json',
-        ])->post('https://api.brevo.com/v3/smtp/email', [
-            'sender' => [
-                'name' => 'Admin Karang Taruna',
-                'email' => $senderEmail
-            ],
-            'to' => [
-                [
-                    'email' => $user->email,
-                    'name' => $user->name
-                ]
-            ],
-            'subject' => 'Selamat, Akun Anda Telah Aktif!',
-            'htmlContent' => "
+        try {
+            \Illuminate\Support\Facades\Mail::html("
                 <div style='font-family: Arial, sans-serif; color: #333;'>
                     <h2>Halo {$user->name}!</h2>
                     <p>Selamat, permohonan pendaftaran Anda telah disetujui (diverifikasi) oleh Admin Karang Taruna.</p>
@@ -230,30 +205,24 @@ class UserController extends Controller
                     <br/>
                     <p>Salam Hangat,<br/>Pengurus Organisasi</p>
                 </div>
-            "
-        ]);
+            ", function ($message) use ($user) {
+                $message->to($user->email, $user->name)
+                        ->subject('Selamat, Akun Anda Telah Aktif!');
+            });
 
-        if ($response->successful()) {
             return response()->json([
                 'success' => true,
                 'message' => "Email aktivasi berhasil dikirim ke {$user->email}."
             ]);
+
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('SMTP Email Error: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengirim email: ' . $e->getMessage()
+            ], 500);
         }
-
-        \Illuminate\Support\Facades\Log::error('Brevo API Error:', $response->json() ?? []);
-
-        $errorResponse = $response->json();
-        $customMessage = 'Gagal mengirim email.';
-
-        if (isset($errorResponse['message'])) {
-             $customMessage = 'Brevo: ' . $errorResponse['message'];
-        }
-
-        return response()->json([
-            'success' => false,
-            'message' => $customMessage,
-            'error' => $errorResponse
-        ], 500);
     }
 
     /**

@@ -156,7 +156,7 @@ class AuthController extends Controller
     /**
      * Handle callback dari Google OAuth.
      */
-    public function googleCallback(Request $request): JsonResponse
+    public function googleCallback(Request $request)
     {
         try {
             $googleUser = Socialite::driver('google')
@@ -191,32 +191,20 @@ class AuthController extends Controller
                 ]);
             }
 
+            $frontendUrl = env('FRONTEND_URL', 'http://localhost:3000');
+
             if ($user->status === 'nonaktif') {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Akun Anda belum diaktifkan. Silakan hubungi admin.',
-                    'data' => ['user' => new UserResource($user)],
-                ], 403);
+                return redirect($frontendUrl . '/login?error=inactive');
             }
 
             $user->tokens()->delete();
             $token = $user->createToken('google-auth-token')->plainTextToken;
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Login dengan Google berhasil!',
-                'data' => [
-                    'user' => new UserResource($user),
-                    'token' => $token,
-                    'token_type' => 'Bearer',
-                ],
-            ]);
+            return redirect($frontendUrl . '/google-callback?token=' . $token);
 
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal login dengan Google: ' . $e->getMessage(),
-            ], 500);
+            $frontendUrl = env('FRONTEND_URL', 'http://localhost:3000');
+            return redirect($frontendUrl . '/login?error=google_failed');
         }
     }
 }

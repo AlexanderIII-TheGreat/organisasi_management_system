@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { login, getGoogleRedirectUrl } from '@/lib/api';
 
 export default function LoginPage() {
@@ -15,6 +15,21 @@ export default function LoginPage() {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [error, setError] = useState('');
   const [isInactive, setIsInactive] = useState(false);
+
+  useEffect(() => {
+    // Membaca URL Parameter error yang dikirimkan dari Backend Google Callback
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const errorParam = params.get('error');
+      
+      if (errorParam === 'inactive') {
+        setIsInactive(true);
+        setError('Akun Anda belum diaktifkan oleh admin.');
+      } else if (errorParam === 'google_failed') {
+        setError('Gagal masuk menggunakan Google. Silakan coba lagi.');
+      }
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
