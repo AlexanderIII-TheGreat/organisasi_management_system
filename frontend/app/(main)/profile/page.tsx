@@ -56,12 +56,11 @@ export default function ProfilPage() {
     fetchUser();
   }, []);
 
-  const fetchUser = async () => {
     setLoading(true);
     try {
-      const response = await getMe();
+      const response = await getMe<UserData>();
       if (response.success && response.data) {
-        const userData = response.data as UserData;
+        const userData = response.data;
         setUser(userData);
         setEditForm({
           name: userData.name || '',

@@ -41,10 +41,10 @@ export default function MinatBakatPage() {
     const fetchData = async () => {
       try {
         // Ambil tes pertama yang aktif
-        const response = await getTalentTests();
+        const response = await getTalentTests<any[]>();
         if (response.success && response.data.length > 0) {
           const testId = response.data[0].id;
-          const detailResponse = await getTalentTest(testId);
+          const detailResponse = await getTalentTest<TestData>(testId);
           if (detailResponse.success) {
             setTest(detailResponse.data);
           }
@@ -82,9 +82,9 @@ export default function MinatBakatPage() {
     if (!test) return;
     setIsSubmitting(true);
     try {
-      const response = await submitTalentTest(test.id, { answers });
+      const response = await submitTalentTest<ResultData>(test.id, { answers });
       if (response.success) {
-        setResult(response.data as ResultData);
+        setResult(response.data);
       } else if (response.message === 'Anda sudah pernah mengerjakan test ini.' && response.data) {
         // Jika sebelumnya sudah pernah submit, langsung tunjukkan hasilnya saja
         setResult(response.data as ResultData);

@@ -29,9 +29,9 @@ export default function AspirasiPage() {
 
   const fetchAspirations = async () => {
     try {
-      const response = await getAspirations();
+      const response = await getAspirations<Aspiration[]>();
       if (response.success && response.data) {
-        setAspirations(response.data as Aspiration[]);
+        setAspirations(response.data);
       }
     } catch (error) {
       console.error('Gagal mengambil riwayat aspirasi:', error);

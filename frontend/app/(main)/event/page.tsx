@@ -30,7 +30,7 @@ export default function EventPage() {
 
     const fetchEvents = async () => {
       try {
-        const response = await getEvents();
+        const response = await getEvents<EventData[]>();
         if (response.success && response.data) {
           setEvents(response.data);
         }

@@ -140,8 +140,8 @@ export async function logout() {
   return response;
 }
 
-export async function getMe() {
-  return apiFetch('/me');
+export async function getMe<T = unknown>() {
+  return apiFetch<T>('/me');
 }
 
 export async function updateProfile(data: FormData | object) {
@@ -216,8 +216,8 @@ export async function getTalentResults<T = unknown>() {
   return apiFetch<T>('/talent-test/results');
 }
 
-export async function submitTalentTest(id: string | number, data: { answers: Array<{ question_id: number; option_id: number }> }) {
-  return apiFetch(`/talent-tests/${id}/submit`, {
+export async function submitTalentTest<T = unknown>(id: string | number, data: { answers: Array<{ question_id: number; option_id: number }> }) {
+  return apiFetch<T>(`/talent-tests/${id}/submit`, {
     method: 'POST',
     body: JSON.stringify(data),
   });

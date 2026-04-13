@@ -58,9 +58,9 @@ export default function HomePage() {
 
     async function fetchUser() {
       try {
-        const response = await getMe();
+        const response = await getMe<UserData>();
         if (response.success && response.data) {
-          const freshUser = response.data as UserData;
+          const freshUser = response.data;
           setUser(freshUser);
           localStorage.setItem('auth_user', JSON.stringify(freshUser));
         }
