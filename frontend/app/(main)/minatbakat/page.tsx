@@ -42,10 +42,10 @@ export default function MinatBakatPage() {
       try {
         // Ambil tes pertama yang aktif
         const response = await getTalentTests<any[]>();
-        if (response.success && response.data.length > 0) {
+        if (response.success && response.data && response.data.length > 0) {
           const testId = response.data[0].id;
           const detailResponse = await getTalentTest<TestData>(testId);
-          if (detailResponse.success) {
+          if (detailResponse.success && detailResponse.data) {
             setTest(detailResponse.data);
           }
         } else {
@@ -83,7 +83,7 @@ export default function MinatBakatPage() {
     setIsSubmitting(true);
     try {
       const response = await submitTalentTest<ResultData>(test.id, { answers });
-      if (response.success) {
+      if (response.success && response.data) {
         setResult(response.data);
       } else if (response.message === 'Anda sudah pernah mengerjakan test ini.' && response.data) {
         // Jika sebelumnya sudah pernah submit, langsung tunjukkan hasilnya saja
