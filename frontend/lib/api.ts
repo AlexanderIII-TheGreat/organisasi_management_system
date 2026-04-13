@@ -192,8 +192,8 @@ export async function submitAspiration(data: { category: string; message: string
   });
 }
 
-export async function getNotifications() {
-  return apiFetch('/notifications');
+export async function getNotifications<T = unknown>() {
+  return apiFetch<T>('/notifications');
 }
 
 export async function markAsRead(id: string) {
@@ -204,16 +204,16 @@ export async function markAllAsRead() {
   return apiFetch('/notifications/read-all', { method: 'POST' });
 }
 
-export async function getTalentTests() {
-  return apiFetch('/talent-tests');
+export async function getTalentTests<T = unknown>() {
+  return apiFetch<T>('/talent-tests');
 }
 
-export async function getTalentTest(id: string | number) {
-  return apiFetch(`/talent-tests/${id}`);
+export async function getTalentTest<T = unknown>(id: string | number) {
+  return apiFetch<T>(`/talent-tests/${id}`);
 }
 
-export async function getTalentResults() {
-  return apiFetch('/talent-test/results');
+export async function getTalentResults<T = unknown>() {
+  return apiFetch<T>('/talent-test/results');
 }
 
 export async function submitTalentTest(id: string | number, data: { answers: Array<{ question_id: number; option_id: number }> }) {
@@ -279,8 +279,8 @@ export async function downloadKta() {
 
 // ─── Admin Management API ──────────────────────────────────────────────────
 
-export async function getAdminDashboardStats() {
-  return apiFetch('/dashboard-stats');
+export async function getAdminDashboardStats<T = unknown>() {
+  return apiFetch<T>('/dashboard-stats');
 }
 
 export async function updateUserStatus(userId: number, status: 'aktif' | 'nonaktif') {
@@ -310,8 +310,8 @@ export async function updateUserPosition(userId: number, positionId: number) {
   });
 }
 
-export async function getPositions() {
-  return apiFetch('/positions');
+export async function getPositions<T = unknown>() {
+  return apiFetch<T>('/positions');
 }
 
 export async function deleteUser(userId: number) {
