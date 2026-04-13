@@ -50,9 +50,9 @@ export default function Navbar() {
       // Hanya sync jika data belum ada atau sudah lebih dari 60 detik
       if (!storedUser || !lastSync || now - parseInt(lastSync) > 60000) {
         try {
-          const response = await getMe();
+          const response = await getMe<NavUser>();
           if (response.success && response.data) {
-            const freshUser = response.data as NavUser;
+            const freshUser = response.data;
             setUser(freshUser);
             localStorage.setItem('auth_user', JSON.stringify(freshUser));
             sessionStorage.setItem('last_user_sync', now.toString());
@@ -64,8 +64,8 @@ export default function Navbar() {
 
       // Fetch Notifications (Selalu fetch untuk memastikan unread count update)
       try {
-        const notifResponse = await getNotifications();
-        if (notifResponse.success) {
+        const notifResponse = await getNotifications<Notification[]>();
+        if (notifResponse.success && notifResponse.data) {
           setNotifications(notifResponse.data);
           setUnreadCount(notifResponse.unread_count);
         }
