@@ -6,6 +6,7 @@ interface ApiResponse<T = unknown> {
   message?: string;
   data?: T;
   errors?: Record<string, string[]>;
+  [key: string]: any; // Allow extra fields like unread_count
 }
 
 interface LoginData {
