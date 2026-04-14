@@ -41,6 +41,10 @@ class User extends Authenticatable
         'status',
         'position_id', // relasi ke tabel positions
         'member_number', // nomor kartu anggota (auto-generated saat register)
+        'activated_at',
+        'expires_at',
+        'renewal_requested_at',
+        'last_reminder_sent_at',
     ];
 
     /**
@@ -64,6 +68,10 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'points' => 'integer',
+            'activated_at' => 'datetime',
+            'expires_at' => 'datetime',
+            'renewal_requested_at' => 'datetime',
+            'last_reminder_sent_at' => 'date',
         ];
     }
 

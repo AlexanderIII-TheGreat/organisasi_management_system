@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { getMe, logout, updateProfile, updatePassword } from '@/lib/api';
+import { getMe, logout, updateProfile, updatePassword, requestRenewal } from '@/lib/api';
 import { useRouter } from 'next/navigation';
 
 interface UserData {
@@ -22,6 +22,9 @@ interface UserData {
   city: string | null;
   district: string | null;
   events_count?: number;
+  remaining_days: number | null;
+  expires_at: string | null;
+  renewal_requested_at: string | null;
 }
 
 export default function ProfilPage() {
@@ -161,6 +164,24 @@ export default function ProfilPage() {
     }
   };
 
+  const handleRequestRenewal = async () => {
+    setIsUpdating(true);
+    try {
+      const res = await requestRenewal();
+      if (res.success) {
+        setMessage({ type: 'success', text: 'Permintaan perpanjangan berhasil dikirim.' });
+        await fetchUser();
+      } else {
+        setMessage({ type: 'error', text: res.message || 'Gagal mengirim permintaan.' });
+      }
+    } catch (err) {
+      setMessage({ type: 'error', text: 'Terjadi kesalahan jaringan.' });
+    } finally {
+      setIsUpdating(false);
+      setTimeout(() => setMessage(null), 3000);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
@@ -228,6 +249,29 @@ export default function ProfilPage() {
               {user.status === 'aktif' ? 'Anggota Aktif' : 'Menunggu Aktivasi'}
             </span>
           </div>
+
+          {user.status === 'aktif' && user.remaining_days !== null && (
+            <div className="mt-2 text-xs font-bold text-on-surface-variant flex items-center justify-center gap-1.5 opacity-80">
+              <span className="material-symbols-outlined text-[16px]">schedule</span>
+              Masa aktif: <span className={user.remaining_days <= 3 ? 'text-error' : 'text-primary'}>{Math.floor(user.remaining_days)} hari lagi</span>
+            </div>
+          )}
+
+          {user.status === 'aktif' && !user.renewal_requested_at && (user.remaining_days !== null && user.remaining_days <= 7) && (
+            <button 
+              onClick={handleRequestRenewal}
+              disabled={isUpdating}
+              className="mt-4 px-6 py-2 bg-primary/10 text-primary border border-primary/20 rounded-full text-xs font-bold hover:bg-primary/20 transition-all active:scale-95 disabled:opacity-50"
+            >
+              Minta Perpanjangan Membership
+            </button>
+          )}
+
+          {user.renewal_requested_at && (
+             <div className="mt-4 px-6 py-2 bg-amber-50 text-amber-700 border border-amber-200 rounded-full text-[10px] font-bold uppercase tracking-wider">
+               Menunggu Persetujuan Admin
+             </div>
+          )}
         </div>
       </section>
 

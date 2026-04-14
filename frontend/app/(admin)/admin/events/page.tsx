@@ -2,6 +2,7 @@
 
 import { useEffect, useState, FormEvent } from 'react';
 import { getEvents, createEvent, updateEvent, deleteEvent, getUsers } from '@/lib/api';
+import ModernModal from '@/components/modern-modal';
 
 interface EventData {
   id: number;
@@ -25,6 +26,29 @@ export default function AdminEventsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<EventData | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Modern Modal State
+  const [modalConfig, setModalConfig] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    type: 'confirm' | 'alert' | 'error' | 'success';
+    confirmText?: string;
+    onConfirm?: () => void;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'confirm'
+  });
+
+  const showPrompt = (config: Omit<typeof modalConfig, 'isOpen'>) => {
+    setModalConfig({ ...config, isOpen: true });
+  };
+
+  const closePrompt = () => {
+    setModalConfig(prev => ({ ...prev, isOpen: false }));
+  };
 
   // Form State
   const [formData, setFormData] = useState({
@@ -124,30 +148,38 @@ export default function AdminEventsPage() {
       if (res.success) {
         closeModal();
         fetchEvents(); // Refresh data
+        showPrompt({ title: 'Berhasil', message: 'Data event berhasil disimpan.', type: 'success' });
       } else {
-        alert(res.message || 'Terjadi kesalahan saat menyimpan event.');
+        showPrompt({ title: 'Gagal', message: res.message || 'Terjadi kesalahan saat menyimpan event.', type: 'error' });
       }
     } catch (e) {
       console.error(e);
-      alert('Gagal menghubungi server.');
+      showPrompt({ title: 'Koneksi Error', message: 'Gagal menghubungi server.', type: 'error' });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!confirm('Yakin ingin menghapus kegiatan ini secara permanen?')) return;
-    try {
-      const res = await deleteEvent(id);
-      if (res.success) {
-        setEvents(events.filter(ev => ev.id !== id));
-      } else {
-        alert(res.message || 'Gagal menghapus kegiatan.');
+  const handleDelete = (id: number) => {
+    showPrompt({
+      title: 'Hapus Event?',
+      message: 'Apakah Anda yakin ingin menghapus kegiatan ini secara permanen? Data yang dihapus tidak dapat dikembalikan.',
+      type: 'error',
+      confirmText: 'Ya, Hapus',
+      onConfirm: async () => {
+        try {
+          const res = await deleteEvent(id);
+          if (res.success) {
+            setEvents(events.filter(ev => ev.id !== id));
+            showPrompt({ title: 'Terhapus', message: 'Event berhasil dihapus.', type: 'success' });
+          } else {
+            showPrompt({ title: 'Gagal', message: res.message || 'Gagal menghapus kegiatan.', type: 'error' });
+          }
+        } catch (e) {
+          showPrompt({ title: 'Error', message: 'Gagal menghubungi server', type: 'error' });
+        }
       }
-    } catch (e) {
-      console.error(e);
-      alert('Gagal menghubungi server');
-    }
+    });
   };
 
   return (
@@ -350,6 +382,16 @@ export default function AdminEventsPage() {
          </div>
       )}
 
+      {/* Modern Modal System */}
+      <ModernModal 
+        isOpen={modalConfig.isOpen}
+        onClose={closePrompt}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        type={modalConfig.type}
+        confirmText={modalConfig.confirmText}
+        onConfirm={modalConfig.onConfirm}
+      />
     </div>
   );
 }

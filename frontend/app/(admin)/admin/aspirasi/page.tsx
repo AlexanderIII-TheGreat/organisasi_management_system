@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { getAspirations, updateAspirationStatus } from '@/lib/api';
+import ModernModal from '@/components/modern-modal';
 
 interface AspirationData {
   id: number;
@@ -20,6 +21,29 @@ export default function AdminAspirasiPage() {
   const [aspirations, setAspirations] = useState<AspirationData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Modal State
+  const [modalConfig, setModalConfig] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    type: 'confirm' | 'alert' | 'error' | 'success';
+    confirmText?: string;
+    onConfirm?: () => void;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'confirm'
+  });
+
+  const showModal = (config: Omit<typeof modalConfig, 'isOpen'>) => {
+    setModalConfig({ ...config, isOpen: true });
+  };
+
+  const closeModal = () => {
+    setModalConfig(prev => ({ ...prev, isOpen: false }));
+  };
+
   useEffect(() => {
     async function fetchAspirations() {
       try {
@@ -36,18 +60,26 @@ export default function AdminAspirasiPage() {
     fetchAspirations();
   }, []);
 
-  const handleStatusChange = async (id: number, newStatus: string) => {
-    try {
-      const res = await updateAspirationStatus(id, newStatus);
-      if (res.success) {
-        setAspirations(aspirations.map(a => a.id === id ? { ...a, status: newStatus } : a));
-      } else {
-        alert(res.message);
+  const handleStatusChange = (id: number, newStatus: string) => {
+    showModal({
+      title: 'Update Status Aspirasi',
+      message: `Ubah status aspirasi ini menjadi "${newStatus.toUpperCase()}"?`,
+      type: 'confirm',
+      confirmText: 'Terapkan Perubahan',
+      onConfirm: async () => {
+        try {
+          const res = await updateAspirationStatus(id, newStatus);
+          if (res.success) {
+            setAspirations(aspirations.map(a => a.id === id ? { ...a, status: newStatus } : a));
+            showModal({ title: 'Tersimpan', message: 'Status aspirasi telah diperbarui.', type: 'success' });
+          } else {
+            showModal({ title: 'Gagal', message: res.message || 'Gagal mengubah status', type: 'error' });
+          }
+        } catch (e) {
+          showModal({ title: 'Kesalahan', message: 'Gagal menghubungi server.', type: 'error' });
+        }
       }
-    } catch (e) {
-      console.error(e);
-      alert('Gagal merubah status aspirasi');
-    }
+    });
   };
 
   return (
@@ -128,6 +160,17 @@ export default function AdminAspirasiPage() {
           </div>
         )}
       </div>
+
+      {/* Modern Modal System */}
+      <ModernModal 
+        isOpen={modalConfig.isOpen}
+        onClose={closeModal}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        type={modalConfig.type}
+        confirmText={modalConfig.confirmText}
+        onConfirm={modalConfig.onConfirm}
+      />
     </div>
   );
 }

@@ -1,17 +1,18 @@
 # Organisasi Management System (Karang Taruna)
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
+![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)
 ![Laravel](https://img.shields.io/badge/Laravel-11.x-FF2D20.svg?logo=laravel&logoColor=white)
 ![Next.js](https://img.shields.io/badge/Next.js-16.x-black.svg?logo=next.js&logoColor=white)
 
-Organisasi Management System (OMS) adalah aplikasi komprehensif yang dirancang secara spesifik, responsif, dan elegan untuk mengelola alur kerja organisasi seperti **Karang Taruna**. Sistem ini menangani portal anggota, rekrutmen/verifikasi pendaftaran, penerbitan Kartu Tanda Anggota (KTA) digital berbentuk tiket interaktif dan dokumen cetak (PDF), penyaluran aspirasi (ticketing), manajemen acara (event), hingga penyediaan modul Tes Minat dan Bakat untuk pemetaan pembagian anggota ke struktur kepanitiaan/divisi.
+Organisasi Management System (OMS) adalah aplikasi komprehensif yang dirancang secara spesifik, responsif, dan elegan untuk mengelola alur kerja organisasi seperti **Karang Taruna**. Sistem ini menangani portal anggota, rekrutmen/verifikasi pendaftaran, penerbitan Kartu Tanda Anggota (KTA) digital berbentuk tiket interaktif, hingga manajemen pengingat masa aktif otomatis via WhatsApp.
 
-## 🚀 Fitur Utama
 - **Manajemen Anggota:** Registrasi, pembuatan otomatis Nomor Induk Anggota (NIA) berdasarkan region kependudukan, role (Admin/Pengurus/Anggota), dan aktivasi yang dilengkapi dengan interkoneksi Email Notifikasi menggunakan Brevo API.
-- **Dynamic KTA (Kartu Tanda Anggota):** Kartu identitas interaktif di portal yang bisa di-flip dengan animasi 3D, serta mendukung pengunduhan dalam format PDF (Render otomatis melalui server/DomPDF).
+- **Sistem Membership & Reminder Otomatis:** Pemantauan masa aktif anggota secara *real-time* dengan fitur pengingat otomatis via WhatsApp (H-3 dan Akun Kedaluwarsa). Dilengkapi dengan alur permintaan dan persetujuan perpanjangan yang terintegrasi.
+- **Premium Modern UI:** Antarmuka modern dengan standar desain *Glassmorphism*, *custom backdrop blur modal*, dan animasi halus untuk memberikan pengalaman pengguna yang eksklusif.
+- **Dynamic KTA (Kartu Tanda Anggota):** Kartu identitas interaktif di portal yang bisa di-flip dengan animasi 3D, serta mendukung pengunduhan dalam format PDF.
 - **Manajemen Acara (Event CMS):** Pembuatan, pengaturan *banner*, status *real-time*, dan pencatatan partisipan untuk setiap inisiatif dan program acara.
-- **Penampungan Inisiatif/Aspirasi:** Mengadopsi metode *helpdesk ticketing* untuk menampung kritik, usulan acara, dan saran anggota, dengan *tracking* status ("Belum Ditinjau", "Sedang Diproses", dll).
-- **Tes Minat & Bakat:** Engine Modul Psikotes mini di mana Admin dapat mengelola bank soal berbentuk *multiple choice* yang langsung menskoring parameter dan memberi keputusan sistem mengenai "Divisi mana pelamar ini paling cocok" (Misal: Humas, Kreatif, Olahraga).
+- **Penampungan Inisiatif/Aspirasi:** Mengadopsi metode *helpdesk ticketing* untuk menampung kritik dan saran, dengan *tracking* status transparan.
+- **Tes Minat & Bakat:** Engine Modul Psikotes mini untuk pemetaan pembagian anggota ke struktur kepanitiaan/divisi yang paling cocok.
 
 ---
 
@@ -30,7 +31,9 @@ Sistem dibangun terpisah dengan menggunakan arsitektur Decoupled/Headless, denga
 - **Database:** MySQL
 - **Manajemen Autentikasi:** Laravel Sanctum (Token-Based Authentication)
 - **Plugin Inti Tambahan:** `barryvdh/laravel-dompdf` (Pembuatan PDF untuk KTA).
-- **Integarsi Third-Party API:** [Brevo API](https://www.brevo.com/) (Transactional SMTP Mailer Service v3).
+- **Integarsi Third-Party API:** 
+    - [Brevo API](https://www.brevo.com/) (Transactional SMTP Mailer Service v3).
+    - [Fonnte API](https://fonnte.com/) (WhatsApp Gateway Service untuk Reminder Otomatis).
 
 ---
 
@@ -41,6 +44,7 @@ Sebelum memulai intalasi, pastikan piranti komputer/server Anda memenuhi syarat 
 - **PHP** V8.2 atau lebih tinggi & **Composer**
 - **MySQL Server**
 - Sebuah akun **Brevo** untuk pengiriman Email aktivasi otomatis.
+- Sebuah akun **Fonnte** untuk pengiriman pengingat WhatsApp otomatis.
 
 ---
 
@@ -82,6 +86,9 @@ DB_PASSWORD=secret
 # Integrasi Brevo untuk notifikasi pendaftaran
 BREVO_APIKEY=kuncirahasia_anda...
 BREVO_EMAIL=email_admin_anda@example.com
+
+# Integrasi Fonnte untuk reminder WhatsApp otomatis
+FONNTE_TOKEN=token_fonnte_anda...
 ```
 
 Lakukan migrasi skema database beserta Dummy/Seeder Data bawaan (Opsional):
@@ -150,6 +157,9 @@ erDiagram
         string district
         string phone
         string photo
+        datetime expires_at "Masa Aktif Anggota"
+        datetime last_reminder_sent_at "Tracking Pengiriman WA"
+        datetime renewal_requested_at "Status Permintaan Perpanjangan"
     }
 
     EVENTS ||--o{ EVENT_PARTICIPANTS : holds

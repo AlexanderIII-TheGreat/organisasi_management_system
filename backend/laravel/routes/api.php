@@ -47,6 +47,7 @@ Route::middleware(['auth:sanctum', \App\Http\Middleware\EnsureAccountIsActive::c
     Route::post('/profile', [UserController::class, 'update']); // alias untuk FormData upload
     Route::put('/profile/password', [UserController::class, 'updatePassword']);
     Route::get('/me/kta-pdf', [UserController::class, 'generateKta']);
+    Route::post('/profile/request-renewal', [UserController::class, 'requestRenewal']);
 
     // Users (anggota bisa lihat list user aktif)
     Route::get('/users', [UserController::class, 'index']);
@@ -80,8 +81,11 @@ Route::middleware(['auth:sanctum', \App\Http\Middleware\EnsureAccountIsActive::c
         Route::patch('/users/{user}/status', [UserController::class, 'updateStatus']);
         Route::patch('/users/{user}/role', [UserController::class, 'updateRole']);
         Route::patch('/users/{user}/position', [UserController::class, 'updatePosition']);
+        Route::patch('/users/{user}/expires-at', [UserController::class, 'updateExpiryDate']);
+        Route::post('/users/{user}/renew', [UserController::class, 'renewMembership']);
         Route::get('/positions', [\App\Http\Controllers\Api\PositionController::class, 'index']);
         Route::post('/users/{user}/send-activation-email', [UserController::class, 'sendActivationEmail']);
+        Route::post('/users/{user}/send-reminder', [UserController::class, 'sendManualReminder']);
         Route::delete('/users/{user}', [UserController::class, 'destroy']);
 
         // Event management

@@ -2,6 +2,7 @@
 
 import { useEffect, useState, FormEvent } from 'react';
 import { getTalentTests, createTalentTest, updateTalentTest, deleteTalentTest, createTalentTestQuestion } from '@/lib/api';
+import ModernModal from '@/components/modern-modal';
 
 interface TalentTest {
   id: number;
@@ -25,6 +26,29 @@ export default function AdminTestsPage() {
   const [isQuestionModalOpen, setIsQuestionModalOpen] = useState(false);
   const [selectedTestId, setSelectedTestId] = useState<number | null>(null);
   
+  // Modern Modal State
+  const [modalConfig, setModalConfig] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    type: 'confirm' | 'alert' | 'error' | 'success';
+    confirmText?: string;
+    onConfirm?: () => void;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'confirm'
+  });
+
+  const showPrompt = (config: Omit<typeof modalConfig, 'isOpen'>) => {
+    setModalConfig({ ...config, isOpen: true });
+  };
+
+  const closePrompt = () => {
+    setModalConfig(prev => ({ ...prev, isOpen: false }));
+  };
+
   // Form State Test
   const [formData, setFormData] = useState({
     title: '',
@@ -117,12 +141,13 @@ export default function AdminTestsPage() {
       if (res.success) {
         closeModal();
         fetchTests();
+        showPrompt({ title: 'Berhasil', message: 'Data tes berhasil disimpan.', type: 'success' });
       } else {
-        alert(res.message || 'Terjadi kesalahan saat menyimpan data tes.');
+        showPrompt({ title: 'Gagal', message: res.message || 'Terjadi kesalahan saat menyimpan data tes.', type: 'error' });
       }
     } catch (e) {
       console.error(e);
-      alert('Gagal menghubungi server.');
+      showPrompt({ title: 'Koneksi Error', message: 'Gagal menghubungi server.', type: 'error' });
     } finally {
       setIsSubmitting(false);
     }
@@ -136,33 +161,40 @@ export default function AdminTestsPage() {
     try {
       const res = await createTalentTestQuestion(selectedTestId, questionData);
       if (res.success) {
-        alert('Pertanyaan berhasil ditambahkan!');
         closeModal();
         fetchTests(); // Refresh stats (increment questions_count)
+        showPrompt({ title: 'Berhasil', message: 'Pertanyaan baru berhasil ditambahkan.', type: 'success' });
       } else {
-        alert(res.message || 'Tertolak oleh server.');
+        showPrompt({ title: 'Gagal', message: res.message || 'Tertolak oleh server.', type: 'error' });
       }
     } catch (e) {
       console.error(e);
-      alert('Gagal menghubungi server');
+      showPrompt({ title: 'Kesalahan', message: 'Gagal menghubungi server.', type: 'error' });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!confirm('Yakin ingin menghapus tes ini beserta semua pertanyaannya secara permanen?')) return;
-    try {
-      const res = await deleteTalentTest(id);
-      if (res.success) {
-        setTests(tests.filter(t => t.id !== id));
-      } else {
-        alert(res.message || 'Gagal menghapus tes.');
+  const handleDelete = (id: number) => {
+    showPrompt({
+      title: 'Hapus Modul Tes?',
+      message: 'Apakah Anda yakin ingin menghapus tes ini beserta semua pertanyaannya secara permanen?',
+      type: 'error',
+      confirmText: 'Ya, Hapus Permanen',
+      onConfirm: async () => {
+        try {
+          const res = await deleteTalentTest(id);
+          if (res.success) {
+            setTests(tests.filter(t => t.id !== id));
+            showPrompt({ title: 'Terhapus', message: 'Modul tes telah dihapus.', type: 'success' });
+          } else {
+            showPrompt({ title: 'Gagal', message: res.message || 'Gagal menghapus tes.', type: 'error' });
+          }
+        } catch (e) {
+          showPrompt({ title: 'Error', message: 'Gagal menghubungi server', type: 'error' });
+        }
       }
-    } catch (e) {
-      console.error(e);
-      alert('Gagal menghubungi server');
-    }
+    });
   };
 
   return (
@@ -411,7 +443,17 @@ export default function AdminTestsPage() {
             </div>
          </div>
       )}
-
+      
+      {/* Modern Modal System */}
+      <ModernModal 
+        isOpen={modalConfig.isOpen}
+        onClose={closePrompt}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        type={modalConfig.type}
+        confirmText={modalConfig.confirmText}
+        onConfirm={modalConfig.onConfirm}
+      />
     </div>
   );
 }

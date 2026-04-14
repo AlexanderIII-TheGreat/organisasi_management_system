@@ -138,7 +138,19 @@ class UserController extends Controller
             'status' => ['required', 'in:aktif,nonaktif'],
         ]);
 
-        $user->update(['status' => $validated['status']]);
+        $updateData = ['status' => $validated['status']];
+
+        if ($validated['status'] === 'aktif') {
+            $updateData['activated_at'] = now();
+            $updateData['expires_at'] = now()->addMonth();
+        } else {
+            // Jika dinonaktifkan, opsional: apakah masa berlaku tetap atau dihapus?
+            // Untuk saat ini kita biarkan saja atau set null jika ingin reset period.
+            $updateData['activated_at'] = null;
+            $updateData['expires_at'] = null;
+        }
+
+        $user->update($updateData);
 
         return response()->json([
             'success' => true,
@@ -223,6 +235,126 @@ class UserController extends Controller
                 'message' => 'Gagal mengirim email: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Admin: Kirim pengingat perpanjangan manual via WhatsApp (Fonnte).
+     */
+    public function sendManualReminder(User $user, \App\Services\FonnteService $fonnteService): JsonResponse
+    {
+        if ($user->status !== 'aktif') {
+            return response()->json([
+                'success' => false,
+                'message' => 'User tidak aktif.'
+            ], 400);
+        }
+
+        if (!$user->phone) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User tidak memiliki nomor telepon.'
+            ], 400);
+        }
+
+        $remainingDays = $user->expires_at ? (int) now()->diffInDays($user->expires_at, false) : 0;
+        $dateStr = $user->expires_at ? $user->expires_at->format('d/m/Y') : '-';
+
+        $message = "Halo *{$user->name}*,\n\nIni adalah pengingat manual dari Admin Karang Taruna. Masa aktif keanggotaan Anda akan berakhir dalam {$remainingDays} hari lagi (tanggal {$dateStr}).\n\nSilakan lakukan perpanjangan keanggotaan Anda. Terima kasih!";
+
+        $response = $fonnteService->sendMessage($user->phone, $message);
+
+        if (isset($response['status']) && $response['status'] == true) {
+            return response()->json([
+                'success' => true,
+                'message' => "Pengingat manual berhasil dikirim ke WhatsApp {$user->name}."
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Gagal mengirim WhatsApp: ' . ($response['reason'] ?? 'Unknown error')
+        ], 500);
+    }
+
+    /**
+     * Anggota: Minta perpanjangan masa aktif.
+     */
+    public function requestRenewal(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        
+        // Opsional: Batasi hanya jika sudah hampir habis (misal H-7)
+        $remainingDays = $user->expires_at ? now()->diffInDays($user->expires_at, false) : 0;
+        
+        if ($remainingDays > 7 && $user->expires_at > now()) {
+             return response()->json([
+                'success' => false,
+                'message' => "Anda hanya dapat meminta perpanjangan ketika masa aktif tersisa 7 hari atau kurang."
+            ], 400);
+        }
+
+        $user->update(['renewal_requested_at' => now()]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Permintaan perpanjangan berhasil dikirim ke Admin.'
+        ]);
+    }
+
+    /**
+     * Admin: Setujui dan perpanjang membership (+1 bulan).
+     */
+    public function renewMembership(User $user, \App\Services\FonnteService $fonnteService): JsonResponse
+    {
+        if (!$user->renewal_requested_at) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User ini belum meminta perpanjangan.'
+            ], 400);
+        }
+
+        // Hitung expires_at baru (jika sudah kedaluwarsa, mulai dari sekarang. jika belum, tambahkan dari yang ada)
+        $currentExpiry = $user->expires_at && $user->expires_at > now() ? $user->expires_at : now();
+        $newExpiry = $currentExpiry->addMonth();
+
+        $user->update([
+            'expires_at' => $newExpiry,
+            'renewal_requested_at' => null // Reset request
+        ]);
+
+        // Kirim WhatsApp Selamat
+        if ($user->phone) {
+            $dateStr = $newExpiry->format('d/m/Y');
+            $message = "Selamat! *{$user->name}*,\n\nPermintaan perpanjangan keanggotaan Anda telah *DISETUJUI* oleh Admin. Masa aktif Anda kini berlaku hingga *{$dateStr}*.\n\nTerima kasih telah menjadi bagian dari Karang Taruna!";
+            $fonnteService->sendMessage($user->phone, $message);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Masa aktif anggota berhasil diperpanjang 1 bulan.',
+            'data' => new UserResource($user->fresh())
+        ]);
+    }
+
+    /**
+     * Admin: Update tanggal kedaluwarsa secara manual.
+     */
+    public function updateExpiryDate(Request $request, User $user): JsonResponse
+    {
+        $validated = $request->validate([
+            'expires_at' => ['required', 'date', 'after:now'],
+        ]);
+
+        $user->update([
+            'expires_at' => $validated['expires_at'],
+            'renewal_requested_at' => null // Reset request jika ada
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Tanggal kedaluwarsa anggota berhasil diperbarui.',
+            'data' => new UserResource($user->fresh())
+        ]);
     }
 
     /**

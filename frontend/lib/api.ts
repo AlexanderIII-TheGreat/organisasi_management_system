@@ -160,6 +160,12 @@ export async function updatePassword(data: object) {
   });
 }
 
+export async function requestRenewal() {
+  return apiFetch('/profile/request-renewal', {
+    method: 'POST'
+  });
+}
+
 export async function getGoogleRedirectUrl() {
   return apiFetch<{ url: string }>('/auth/google');
 }
@@ -294,6 +300,25 @@ export async function updateUserStatus(userId: number, status: 'aktif' | 'nonakt
 export async function sendActivationEmail(userId: number) {
   return apiFetch(`/users/${userId}/send-activation-email`, {
     method: 'POST'
+  });
+}
+
+export async function sendWhatsAppReminder(userId: number) {
+  return apiFetch(`/users/${userId}/send-reminder`, {
+    method: 'POST'
+  });
+}
+
+export async function renewMembership(userId: number) {
+  return apiFetch(`/users/${userId}/renew`, {
+    method: 'POST'
+  });
+}
+
+export async function updateExpiryDate(userId: number, date: string) {
+  return apiFetch(`/users/${userId}/expires-at`, {
+    method: 'PATCH',
+    body: JSON.stringify({ expires_at: date })
   });
 }
 
