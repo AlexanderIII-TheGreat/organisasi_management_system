@@ -29,8 +29,8 @@ export default function AdminTestsPage() {
   // Modern Modal State
   const [modalConfig, setModalConfig] = useState<{
     isOpen: boolean;
-    title: string;
-    message: string;
+    title?: string;
+    message?: string;
     type: 'confirm' | 'alert' | 'error' | 'success';
     confirmText?: string;
     onConfirm?: () => void;

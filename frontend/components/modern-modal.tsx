@@ -6,8 +6,8 @@ interface ModernModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm?: (value?: string) => void;
-  title: string;
-  message: string;
+  title?: string;
+  message?: string;
   type?: 'confirm' | 'alert' | 'input' | 'error' | 'success';
   inputType?: string;
   placeholder?: string;
@@ -20,8 +20,8 @@ export default function ModernModal({
   isOpen,
   onClose,
   onConfirm,
-  title,
-  message,
+  title = '',
+  message = '',
   type = 'confirm',
   inputType = 'text',
   placeholder = '',

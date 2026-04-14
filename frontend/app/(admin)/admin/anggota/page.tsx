@@ -32,8 +32,8 @@ export default function AdminAnggotaPage() {
   // Modal State
   const [modalConfig, setModalConfig] = useState<{
     isOpen: boolean;
-    title: string;
-    message: string;
+    title?: string;
+    message?: string;
     type: 'confirm' | 'alert' | 'input' | 'error' | 'success';
     inputType?: string;
     inputValue?: string;
@@ -163,9 +163,9 @@ export default function AdminAnggotaPage() {
         try {
           const res = await sendActivationEmail(userId);
           if (res.success) {
-            showModal({ title: 'Terkirim!', message: res.message, type: 'success' });
+            showModal({ title: 'Terkirim!', message: res.message ?? 'Email aktivasi berhasil dikirim.', type: 'success' });
           } else {
-            showModal({ title: 'Gagal', message: res.message || 'Gagal mengirim email.', type: 'error' });
+            showModal({ title: 'Gagal', message: res.message ?? 'Gagal mengirim email.', type: 'error' });
           }
         } catch (e) {
           showModal({ title: 'Koneksi Error', message: 'Gagal menghubungi server mail.', type: 'error' });
@@ -184,9 +184,9 @@ export default function AdminAnggotaPage() {
         try {
           const res = await sendWhatsAppReminder(userId);
           if (res.success) {
-            showModal({ title: 'Berhasil', message: res.message, type: 'success' });
+            showModal({ title: 'Berhasil', message: res.message ?? 'WhatsApp reminder berhasil dikirim.', type: 'success' });
           } else {
-            showModal({ title: 'Gagal', message: res.message || 'Gagal mengirim WhatsApp.', type: 'error' });
+            showModal({ title: 'Gagal', message: res.message ?? 'Gagal mengirim WhatsApp.', type: 'error' });
           }
         } catch (e) {
           showModal({ title: 'Koneksi Error', message: 'Gagal menghubungi server WhatsApp', type: 'error' });
